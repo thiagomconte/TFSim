@@ -115,6 +115,35 @@ int sc_main(int argc, char *argv[])
             instruct_time["MEM"] = std::stoi(mem_t.value());
         }
     });
+	
+    sub->append("Latência de instruções por arquivo",[&](menu::item_proxy &ip)
+   {
+        filebox fb(0,true);
+        inputbox ibox(fm,"Localização do arquivo de valores de registradores inteiros:");
+        inputbox::path caminho("",fb);
+        if(ibox.show_modal(caminho))
+        {
+            auto path = caminho.value();
+            inFile.open(path);
+            string line[7];
+	    int i = 0
+            if(!inFile.is_open())
+                show_message("Arquivo inválido","Não foi possível abrir o arquivo!");
+            else
+            {
+		while( getline(inFile, line))
+		{
+		   inFile >> line[i];
+   		   ++i;
+		}
+            }
+	    for(int i = 0; i< 7; ++i)
+	    {
+		instruct_time[i] = line[i];
+	    }
+        }
+    });    
+
     sub->append("Fila de instruções", [&](menu::item_proxy &ip)
     {
         filebox fb(0,true);
@@ -140,7 +169,8 @@ int sc_main(int argc, char *argv[])
             auto path = caminho.value();
             inFile.open(path);
             if(!inFile.is_open())
-                show_message("Arquivo inválido","Não foi possível abrir o arquivo!");
+                show_message("Arquivo in
+válido","Não foi possível abrir o arquivo!");
             else
             {
                 auto reg_gui = reg.at(0);
