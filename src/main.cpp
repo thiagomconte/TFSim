@@ -64,7 +64,8 @@ int sc_main(int argc, char *argv[])
     clock_group["count"] << clock_count;
     clock_group.collocate();
 
-    set_spec(plc,false);
+    spec = false;
+    set_spec(plc,spec);
     plc.collocate();
 
     mnbar.push_back("Opções");
@@ -72,9 +73,10 @@ int sc_main(int argc, char *argv[])
     menu::item_proxy spec_ip = op.append("Especulação",[&](menu::item_proxy &ip)
     {
         if(ip.checked())
-            set_spec(plc,true);
+            spec = true;
         else
-            set_spec(plc,false);
+            spec = false;
+        set_spec(plc,spec);
     });
     op.check_style(0,menu::checks::highlight);
     op.append("Modificar valores...");
@@ -94,6 +96,7 @@ int sc_main(int argc, char *argv[])
     });
     // Menu de ajuste dos tempos de latencia na interface
     // Novas instrucoes devem ser adcionadas manualmente aqui
+
     sub->append("Tempos de latência", [&](menu::item_proxy &ip)
     {
         inputbox ibox(fm,"","Tempos de latência para instruções");
@@ -114,35 +117,41 @@ int sc_main(int argc, char *argv[])
             instruct_time["DDIV"] = std::stoi(ddiv_t.value());
             instruct_time["MEM"] = std::stoi(mem_t.value());
         }
-    });
-	
-    sub->append("Latência de instruções por arquivo",[&](menu::item_proxy &ip)
-   {
-        filebox fb(0,true);
-        inputbox ibox(fm,"Localização do arquivo de valores de registradores inteiros:");
-        inputbox::path caminho("",fb);
-        if(ibox.show_modal(caminho))
-        {
-            auto path = caminho.value();
-            inFile.open(path);
-            string line[7];
-	    int i = 0
-            if(!inFile.is_open())
-                show_message("Arquivo inválido","Não foi possível abrir o arquivo!");
-            else
-            {
-		while( getline(inFile, line))
-		{
-		   inFile >> line[i];
-   		   ++i;
-		}
-            }
-	    for(int i = 0; i< 7; ++i)
-	    {
-		instruct_time[i] = line[i];
-	    }
-        }
-    });    
+	int  numbers[7];
+	int count = 0;
+	char output[7];
+	filebox fb(0,true);
+	inputbox obox(fm,"Localização do arquivo:");
+	inputbox::path caminho("",fb);
+	if(obox.show_modal(caminho))
+	{
+		auto path = caminho.value();
+		inFile.open(path);
+	if(!inFile.is_open()){
+		show_message("Arquivo inválido","Não foi possível abrir o arquivo!");
+	}
+	else 
+	{
+		while(inFile >> output && !inFile.eof())
+                {
+			numbers[count] = atoi(output);
+            		count++;
+                }
+
+
+		instruct_time["DADD"] = numbers[0];
+	        instruct_time["DADDI"] = numbers[1];
+                instruct_time["DSUB"] = numbers[2];
+                instruct_time["DSUBI"] = numbers[3];
+                instruct_time["DMUL"] = numbers[4];
+                instruct_time["DDIV"] = numbers[5];
+                instruct_time["MEM"] = numbers[6];
+		
+		inFile.close();	
+	}
+	}
+
+   });
 
     sub->append("Fila de instruções", [&](menu::item_proxy &ip)
     {
@@ -169,8 +178,7 @@ int sc_main(int argc, char *argv[])
             auto path = caminho.value();
             inFile.open(path);
             if(!inFile.is_open())
-                show_message("Arquivo in
-válido","Não foi possível abrir o arquivo!");
+                show_message("Arquivo inválido","Não foi possível abrir o arquivo!");
             else
             {
                 auto reg_gui = reg.at(0);
@@ -540,8 +548,8 @@ válido","Não foi possível abrir o arquivo!");
                     }
                     break;
                 case 's':
-                    set_spec(plc,true); 
                     spec = true;
+                    set_spec(plc,spec); 
                     spec_ip.checked(true);
                     k--;
                     break;
@@ -583,7 +591,8 @@ válido","Não foi possível abrir o arquivo!");
             for(int i = 0 ; i < 5 ; i++)
                 bench_sub->enabled(i,false);
             if(spec)
-                top1.rob_mode(nadd,nmul,nls,instruct_time,instruction_queue,table,memory,reg,instruct,clock_count,rob);
+       
+         top1.rob_mode(nadd,nmul,nls,instruct_time,instruction_queue,table,memory,reg,instruct,clock_count,rob);
             else
                 top1.simple_mode(nadd,nmul,nls,instruct_time,instruction_queue,table,memory,reg,instruct,clock_count);
             sc_start();
@@ -605,3 +614,4 @@ válido","Não foi possível abrir o arquivo!");
     exec();
     return 0;
 }
+
