@@ -67,6 +67,10 @@ void res_station::exec()
                 rs = std::to_string((int)res);
             escrita_saida = std::to_string(id) + ' ' + rs;
             cout << "Instrucao " << op << " completada no ciclo " << sc_time_stamp() << " em " << name() << " com resultado " << res << endl << flush;
+	    double x = sc_time_stamp().value();
+	    double y = instr_pos + 1;
+	    cout << "\n\nDESEMPENHO CPI = " << (x/y)/1000;
+	    cout << "\n\n";
             out->write(escrita_saida);
         }
         else
@@ -79,6 +83,10 @@ void res_station::exec()
             {
                 mem_req(false,a,vj);
                 cout << "Instrucao " << op << " completada no ciclo " << sc_time_stamp() << " em " << name() << " gravando na posicao de memoria " << a << " o resultado " << vj << endl << flush;
+	        double x = sc_time_stamp().value();
+	        double y = instr_pos + 1;
+	        cout << "\n\nDESEMPENHO CPI = " << (x/y)/1000;
+	        cout << "\n\n";
             }
             isFirst = false;
             a = 0;
