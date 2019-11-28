@@ -23,6 +23,7 @@ cat(c)
 
 void res_station::exec()
 {
+    	    double w = 0;
     while(true)
     {
         //Enquanto houver dependencia de valor em outra RS, espere
@@ -69,7 +70,10 @@ void res_station::exec()
             cout << "Instrucao " << op << " completada no ciclo " << sc_time_stamp() << " em " << name() << " com resultado " << res << endl << flush;
 	    double x = sc_time_stamp().value();
 	    double y = instr_pos + 1;
-	    cout << "\n\nDESEMPENHO CPI = " << (x/y)/1000;
+	    if (y > w){
+		w = y;
+	    }
+	    cout << "\n\nDESEMPENHO CPI = " << (x/w)/1000;
 	    cout << "\n\n";
             out->write(escrita_saida);
         }
@@ -85,6 +89,9 @@ void res_station::exec()
                 cout << "Instrucao " << op << " completada no ciclo " << sc_time_stamp() << " em " << name() << " gravando na posicao de memoria " << a << " o resultado " << vj << endl << flush;
 	        double x = sc_time_stamp().value();
 	        double y = instr_pos + 1;
+	   	if (y > w){
+		w = y;
+	        }
 	        cout << "\n\nDESEMPENHO CPI = " << (x/y)/1000;
 	        cout << "\n\n";
             }
